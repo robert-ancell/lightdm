@@ -1,0 +1,19 @@
+#define VERSION                 "@version@"
+#define GETTEXT_PACKAGE         "lightdm"
+
+#define CACHE_DIR               "@cache_dir"
+#define CONFIG_DIR              "@config_dir@"
+#define LOG_DIR                 "@log_dir@"
+#define REMOTE_SESSIONS_DIR     "@remote_sessions_dir@"
+#define RUN_DIR                 "@log_dir@"
+#define SBIN_DIR                "@sbin_dir@"
+#define SESSIONS_DIR            "@sessions_dir@"
+#define USERS_DIR               "@users_dir@"
+#define WAYLAND_SESSIONS_DIR    "@wayland_sessions_dir@"
+
+#define DEFAULT_GREETER_SESSION "@default_greeter_session@"
+#define DEFAULT_USER_SESSION    "@default_user_session@"
+#define GREETER_USER            "@greeter_user@"
+
+// FIXME
+#define HAVE_CLEARENV 1

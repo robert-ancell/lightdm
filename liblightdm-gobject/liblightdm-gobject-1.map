@@ -1,0 +1,6 @@
+{
+global:
+    lightdm_*;
+local:
+    *;
+}

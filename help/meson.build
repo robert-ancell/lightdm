@@ -1,0 +1,22 @@
+languages = [ ]
+
+gnome.yelp ('lightdm',
+            sources: [ 'autologin.page',
+                        'config.page',
+                        'default-greeter.page',
+                        'default-session.page',
+                        'diagnostics.page',
+                        'guest.page',
+                        'index.page',
+                        'legal.xml',
+                        'local-sessions.page',
+                        'remote-sessions.page',
+                        'seat.page',
+                        'standard-authentication.page',
+                        'user-list.page',
+                        'user-switching.page',
+                        'vnc.page',
+                        'write-greeter.page',
+                        'xdmcp.page' ],
+            languages: languages,
+            symlink_media: false)
