@@ -145,6 +145,68 @@ get_config_sections (const gchar *seat_name)
 }
 
 static void
+get_accounts_autologin_user (Seat *seat)
+{
+    g_autoptr(GDBusConnection) connection = NULL;
+    g_autoptr(GVariant) result = NULL;
+    g_autoptr(GVariantIter) iter = NULL;
+    const gchar *path;
+    g_autoptr(GError) error = NULL;
+
+    connection = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL);
+
+    result = g_dbus_connection_call_sync (connection,
+                                          "org.freedesktop.Accounts",
+                                          "/org/freedesktop/Accounts",
+                                          "org.freedesktop.Accounts",
+                                          "ListCachedUsers",
+                                          g_variant_new ("()"),
+                                          G_VARIANT_TYPE ("(ao)"),
+                                          G_DBUS_CALL_FLAGS_NONE,
+                                          -1,
+                                          NULL,
+                                          &error);
+    if (result == NULL)
+    {
+        g_warning ("Failed to get automatic login details from AccountsService: %s", error->message);
+        return;
+    }
+
+    g_variant_get (result, "(ao)", &iter);
+    while (g_variant_iter_next (iter, "&o", &path))
+    {
+        g_autoptr(GDBusProxy) proxy = NULL;
+        g_autoptr(GVariant) username = NULL;
+        g_autoptr(GVariant) automatic_login = NULL;
+        g_autoptr(GError) user_error = NULL;
+
+        proxy = g_dbus_proxy_new_sync (connection,
+                                       0, NULL,
+                                       "org.freedesktop.Accounts",
+                                       path,
+                                       "org.freedesktop.Accounts.User",
+                                       NULL,
+                                       &user_error);
+        if (proxy == NULL)
+        {
+            g_warning ("Failed to get automatic login details from AccountsService for user %s: %s", path, user_error->message);
+            continue;
+        }
+
+        username = g_dbus_proxy_get_cached_property (proxy, "UserName");
+        automatic_login = g_dbus_proxy_get_cached_property (proxy, "AutomaticLogin");
+
+        if (g_variant_get_boolean (automatic_login))
+        {
+            seat_set_property (seat, "autologin-user", g_variant_get_string (username, NULL));
+            return;
+        }
+    }
+
+    seat_set_property (seat, "autologin-user", NULL);
+}
+
+static void
 set_seat_properties (Seat *seat, const gchar *seat_name)
 {
     GList *sections, *link;
@@ -166,6 +228,10 @@ set_seat_properties (Seat *seat, const gchar *seat_name)
         }
     }
     g_list_free_full (sections, g_free);
+
+    /* Override autologin with AccountsService settings */
+    if (seat_get_boolean_property (seat, "autologin-from-accounts-service") && g_strcmp0 (seat_name, "seat0") == 0)
+        get_accounts_autologin_user (seat);
 }
 
 static void
@@ -816,6 +882,8 @@ main (int argc, char **argv)
         config_set_boolean (config_get_instance (), "LightDM", "dbus-service", TRUE);
     if (!config_has_key (config_get_instance (), "Seat:*", "type"))
         config_set_string (config_get_instance (), "Seat:*", "type", "local");
+    if (!config_has_key (config_get_instance (), "Seat:*", "autologin-from-accounts-service"))
+        config_set_boolean (config_get_instance (), "Seat:*", "autologin-from-accounts-service", TRUE);
     if (!config_has_key (config_get_instance (), "Seat:*", "pam-service"))
         config_set_string (config_get_instance (), "Seat:*", "pam-service", "lightdm");
     if (!config_has_key (config_get_instance (), "Seat:*", "pam-autologin-service"))
@@ -971,7 +1039,7 @@ main (int argc, char **argv)
             }
             if (seat)
             {
-                set_seat_properties (seat, NULL);
+                set_seat_properties (seat, "seat0");
                 seat_set_property (seat, "exit-on-failure", "true");
                 if (!display_manager_add_seat (display_manager, seat))
                     return EXIT_FAILURE;

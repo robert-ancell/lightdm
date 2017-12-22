@@ -2133,6 +2133,11 @@ handle_user_get_property (GDBusConnection       *connection,
         return g_variant_new_uint64 (user->uid);
     else if (strcmp (property_name, "XSession") == 0)
         return g_variant_new_string (user->xsession ? user->xsession : "");
+    else if (strcmp (property_name, "AutomaticLogin") == 0)
+    {
+        g_autofree gchar *autologin_user_name = g_key_file_get_string (config, "test-accounts-service", "autologin-user", NULL);
+        return g_variant_new_boolean (g_strcmp0 (user->user_name, autologin_user_name) == 0);
+    }
 
     return NULL;
 }
@@ -2193,6 +2198,7 @@ accounts_user_set_hidden (AccountsUser *user, gboolean hidden, gboolean emit_sig
             "    <method name='SetXSession'>"
             "      <arg name='x_session' direction='in' type='s'/>"
             "    </method>"
+            "    <property name='AutomaticLogin' type='b' access='read'/>"
             "    <property name='UserName' type='s' access='read'/>"
             "    <property name='RealName' type='s' access='read'/>"
             "    <property name='HomeDirectory' type='s' access='read'/>"

@@ -21,6 +21,7 @@ TESTS = \
 	test-additional-system-config-priority \
 	test-headless \
 	test-autologin \
+	test-autologin-ignore-accounts-service \
 	test-autologin-pam \
 	test-autologin-pam-config \
 	test-autologin-in-background \
@@ -429,6 +430,7 @@ EXTRA_DIST = \
 	scripts/autologin-guest-logout.conf \
 	scripts/autologin-guest-session-config.conf \
 	scripts/autologin-guest-timeout.conf \
+	scripts/autologin-ignore-accounts-service.conf \
 	scripts/autologin-in-background.conf \
 	scripts/autologin-invalid-greeter.conf \
 	scripts/autologin-pam.conf \
