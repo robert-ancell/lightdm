@@ -1,19 +1,3 @@
-dnl Process this file with autoconf to produce a configure script.
-
-AC_INIT(lightdm, 1.28.0)
-AC_CONFIG_MACRO_DIR(m4)
-AC_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz foreign])
-AM_SILENT_RULES(yes)
-AC_PROG_CC_C99
-LT_INIT
-AM_PROG_CC_C_O
-AC_PROG_CXX
-AC_PROG_LIBTOOL
-AC_PROG_LN_S
-AC_PROG_MKDIR_P
-AM_MAINTAINER_MODE
-
 dnl Check if the compiler really supports `-std=c99`.
 if test "x$ac_cv_prog_cc_c99" = xno; then
     AC_MSG_ERROR([$CC does not support '-std=c99'.])
@@ -33,8 +17,6 @@ if test "x$GCC" = xyes; then
                  -Werror=missing-include-dirs"
     WARN_CXXFLAGS="-Wall"
 fi
-AC_SUBST(WARN_CFLAGS)
-AC_SUBST(WARN_CXXFLAGS)
 
 GOBJECT_INTROSPECTION_CHECK(0.9.5)
 
@@ -49,55 +31,12 @@ AC_CHECK_HEADERS(security/pam_appl.h, [], AC_MSG_ERROR(PAM not found))
 AC_CHECK_HEADERS(gcrypt.h, [], AC_MSG_ERROR(libgcrypt not found))
 
 AC_CHECK_FUNCS(setresgid setresuid clearenv)
-
-PKG_CHECK_MODULES(LIGHTDM, [
-    glib-2.0 >= 2.44
-    gio-2.0 >= 2.26
-    gio-unix-2.0
-    xdmcp
-    xcb
-])
-
-PKG_CHECK_MODULES(GLIB, [
-    glib-2.0
-])
-
-PKG_CHECK_MODULES(GIO, [
-    gio-2.0
-])
-
-PKG_CHECK_MODULES(GIO_UNIX, [
-    gio-unix-2.0
-])
-
-PKG_CHECK_MODULES(GOBJECT, [
-    gobject-2.0
-])
-
-PKG_CHECK_MODULES(XCB, [
-    xcb
-])    
-
-PKG_CHECK_MODULES(LIBLIGHTDM_GOBJECT, [
-    glib-2.0 >= 2.44
-    gio-2.0 >= 2.26
-    gio-unix-2.0
-    gobject-2.0
-    libxklavier
-    x11
-])
-
 AC_ARG_ENABLE(liblightdm-qt,
 	AS_HELP_STRING([--enable-liblightdm-qt],[Enable LightDM client Qt4 libraries [[default=auto]]]),
 	[enable_liblightdm_qt4=$enableval],
 	[enable_liblightdm_qt4="auto"])
 compile_liblightdm_qt4=no
 if test x"$enable_liblightdm_qt4" != "xno" ; then
-    PKG_CHECK_MODULES(LIBLIGHTDM_QT4, [
-        QtCore
-        QtDBus
-        QtGui
-    ],
     [compile_liblightdm_qt4=yes],
     [if test "x$enable_liblightdm_qt4" != xauto; then
         AC_MSG_FAILURE(
@@ -127,11 +66,6 @@ AC_ARG_ENABLE(liblightdm-qt5,
 	[enable_liblightdm_qt5="auto"])
 compile_liblightdm_qt5=no
 if test x"$enable_liblightdm_qt5" != "xno"; then
-    PKG_CHECK_MODULES(LIBLIGHTDM_QT5, [
-        Qt5Core
-        Qt5DBus
-        Qt5Gui
-    ],
     [compile_liblightdm_qt5=yes],
     [if test "x$enable_liblightdm_qt5" != xauto; then
         AC_MSG_FAILURE(
